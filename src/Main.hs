@@ -2,6 +2,8 @@ import System.Environment
 import KnapsackBruteSolver
 import Parser
 
+printHelp = putStrLn "Usage: flp22-fun OPTION \n\nPossible run options: \n -i filepath \t Info about knapsack \n -b filepath \t Solve knapsack with brute force \n -o filepath \t Solve knapsack with optimized algorithm \n"
+
 main :: IO ()
 main = do
     args <- getArgs
@@ -14,6 +16,6 @@ main = do
                     (False, _) -> print False
                     (True, solution) -> print solution
                 "-o" -> print "Jdu optimalizovat"
-                _   -> print "Spatne pouziti programu"
+                _   -> printHelp
 
-        _ -> putStrLn "Usage: program_name filename"
+        _ -> printHelp
