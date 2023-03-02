@@ -5,24 +5,23 @@ module Parser
 )   where
 
 import Text.ParserCombinators.Parsec
-import System.Environment
 import Knapsack
 
 -- Parse information about items in knapsack
 parseItem :: GenParser Char st Item
 parseItem = do
     spaces
-    string "Item {"
+    _ <- string "Item {"
     spaces
-    string "weight:"
+    _ <- string  "weight:"
     spaces
     weight <- many1 digit
     spaces
-    string "cost:"
+    _ <- string  "cost:"
     spaces
     cost <- many1 digit
     spaces
-    char '}'
+    _ <- char  '}'
     spaces
     return $ Item (read weight) (read cost)
     
@@ -30,25 +29,25 @@ parseItem = do
 parseKnapsack :: GenParser Char st Knapsack
 parseKnapsack = do
     spaces
-    string "Knapsack {"
+    _ <- string  "Knapsack {"
     spaces
-    string "maxWeight:"
+    _ <- string  "maxWeight:"
     spaces
     maxWeight <- many1 digit
     spaces
-    string "minCost:"
+    _ <- string  "minCost:"
     spaces
     minCost <- many1 digit
     spaces
-    string "items:"
+    _ <- string  "items:"
     spaces
-    char '['
+    _ <- char '['
     spaces
     items <- sepBy parseItem spaces
     spaces
-    char ']'
+    _ <- char ']'
     spaces
-    char '}'
+    _ <- char '}'
     spaces
     return $ Knapsack (read maxWeight) (read minCost) items
 

@@ -3,34 +3,21 @@ module KnapsackSolver
     solveKnapsackBruteforce,
 ) where
 
-import Data.Array
 import Knapsack
 import Debug.Trace
 
 newtype Solution = Solution [Int] deriving (Show)
 
+-- TODO DELETE
+debug :: c -> String -> c
 debug = flip trace
-
-solutionCompare :: (Ord a) => (a, [Int]) -> (a, [Int]) -> (a, [Int])
-solutionCompare a b
-  | fst a >= fst b = a
-  | otherwise = b
 
 filterFailedSolutions :: (Int, [Int]) -> Bool
 filterFailedSolutions (cost, _) = cost >= 0
 
-getBestSolution :: Ord a => [(a, [Int])] -> (a, [Int])
-getBestSolution []     = error "maximum of empty list"
-getBestSolution (x:xs) = maxTail x xs
-  where maxTail currentMax [] = currentMax
-        maxTail (cost, variant) (p:ps)
-          | cost < fst p = maxTail p ps
-          | otherwise   = maxTail (cost, variant) ps
-
 -- Returns weight and cost of knapsack variant passed in first parameter
 -- Params: Knapsack items -> knapsack variant (eg. [0,1,0,0])
 getVariantWeightAndCost :: [Item] -> [Int] -> (Int, Int)
-getVariantWeightAndCost [] [] = (0, 0)
 getVariantWeightAndCost (item : items) (isItemIncluded : variants) =
     -- If item is included in this variant add his cost and weight to sum
     if isItemIncluded == 1
@@ -38,6 +25,7 @@ getVariantWeightAndCost (item : items) (isItemIncluded : variants) =
             let (weightSum, costSum) = getVariantWeightAndCost items variants
             (weight item + weightSum , cost item + costSum)
         else getVariantWeightAndCost items variants
+getVariantWeightAndCost _ _ = (0, 0)
 
 -- Returns all permutations of 0 and 1 (generatePermutations 2 = [[0,0], [1,0], [0,1], [1,1]])
 -- Params: Number of array elements
