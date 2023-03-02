@@ -1,5 +1,5 @@
 import System.Environment
-import KnapsackSolver
+import KnapsackBruteSolver
 import Parser
 
 main :: IO ()

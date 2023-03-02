@@ -1,4 +1,4 @@
-module KnapsackSolver
+module KnapsackBruteSolver
 (
     solveKnapsackBruteforce,
 ) where
@@ -49,8 +49,7 @@ solveVariant knapsack variant = do
 getBestVariant :: Knapsack -> [(Int, [Int])] -> (Int, [Int])
 getBestVariant _ [] = (-1, [])
 getBestVariant knapsack variants = do
-    let solvedVariants = filter filterFailedSolutions (map helper variants) where
-        helper = solveVariant knapsack
+    let solvedVariants = filter filterFailedSolutions (map (solveVariant knapsack) variants)
     if not (null solvedVariants) then
             maximum solvedVariants
     else
