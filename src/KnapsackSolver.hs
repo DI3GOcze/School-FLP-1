@@ -19,14 +19,6 @@ solutionCompare a b
 filterFailedSolutions :: (Int, [Int]) -> Bool
 filterFailedSolutions (cost, _) = cost >= 0
 
-getBestSolution :: Ord a => [(a, [Int])] -> (a, [Int])
-getBestSolution []     = error "maximum of empty list"
-getBestSolution (x:xs) = maxTail x xs
-  where maxTail currentMax [] = currentMax
-        maxTail (cost, variant) (p:ps)
-          | cost < fst p = maxTail p ps
-          | otherwise   = maxTail (cost, variant) ps
-
 -- Returns weight and cost of knapsack variant passed in first parameter
 -- Params: Knapsack items -> knapsack variant (eg. [0,1,0,0])
 getVariantWeightAndCost :: [Item] -> [Int] -> (Int, Int)
@@ -56,15 +48,19 @@ solveVariant knapsack variant = do
     else
         (-1, snd variant)
 
+
+getBetterSolution :: (Eq solution) => [(Int, solution)] -> (Int, solution)
+getBetterSolution = foldr1 (\best candidate -> if fst candidate >= 0 && fst candidate > fst best then candidate else best)
+
 -- Returns 
 -- Params: Knapsack -> All variants -> Best variant so far -> returns best variant (weight, cost, variant)
 getBestVariant :: Knapsack -> [(Int, [Int])] -> (Int, [Int])
 getBestVariant _ [] = (-1, [])
 getBestVariant knapsack variants = do
-    let solvedVariants = filter filterFailedSolutions (map helper variants) where
+    let solvedVariants = map helper variants where
         helper = solveVariant knapsack
     if not (null solvedVariants) then
-            maximum solvedVariants
+            getBetterSolution solvedVariants
     else
         (0, [])
 
