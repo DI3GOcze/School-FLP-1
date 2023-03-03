@@ -2,23 +2,25 @@
 
 module Knapsack 
 (   Item (..),
-    Items (..),
-    Knapsack (..)
+    Knapsack (..),
+    Weight,
+    Cost
 ) where
 
-type Items = [Item]
+type Weight = Int
+type Cost = Int
 
 -- Datatype of an item in knapsack
 data Item = Item { 
-    weight :: Int, 
-    cost :: Int 
+    weight :: Weight, 
+    cost :: Cost 
 }
 
 -- Datatype of knapsack
 data Knapsack = Knapsack { 
-    maxWeight :: Int, 
-    minCost :: Int, 
-    items :: Items
+    maxWeight :: Weight, 
+    minCost :: Cost, 
+    items :: [Item]
 }
 
     
