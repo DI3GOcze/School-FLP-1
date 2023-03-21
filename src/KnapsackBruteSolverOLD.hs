@@ -1,10 +1,10 @@
 module KnapsackBruteSolverOLD
-(
-    solveKnapsackBruteforce,
-) where
+  ( solveKnapsackBruteforce,
+  )
+where
 
-import Knapsack
 import Debug.Trace
+import Knapsack
 
 newtype Solution = Solution [Int] deriving (Show)
 
@@ -19,12 +19,12 @@ filterFailedSolutions (cost, _) = cost >= 0
 -- Params: Knapsack items -> knapsack variant (eg. [0,1,0,0])
 getVariantWeightAndCost :: [Item] -> [Int] -> (Int, Int)
 getVariantWeightAndCost (item : items) (isItemIncluded : variants) =
-    -- If item is included in this variant add his cost and weight to sum
-    if isItemIncluded == 1
-        then do
-            let (weightSum, costSum) = getVariantWeightAndCost items variants
-            (weight item + weightSum , cost item + costSum)
-        else getVariantWeightAndCost items variants
+  -- If item is included in this variant add his cost and weight to sum
+  if isItemIncluded == 1
+    then do
+      let (weightSum, costSum) = getVariantWeightAndCost items variants
+      (weight item + weightSum, cost item + costSum)
+    else getVariantWeightAndCost items variants
 getVariantWeightAndCost _ _ = (0, 0)
 
 -- Returns all permutations of 0 and 1 (generatePermutations 2 = [[0,0], [1,0], [0,1], [1,1]])
@@ -32,36 +32,35 @@ getVariantWeightAndCost _ _ = (0, 0)
 generatePermutations :: Int -> [(Int, [Int])]
 generatePermutations 0 = [(0, [])]
 generatePermutations n = [(0, xs) | xs <- generateSublists n]
-  where generateSublists 0 = [[]]
-        generateSublists k = [ x:xs | x <- [0,1], xs <- generateSublists (k-1) ]
+  where
+    generateSublists 0 = [[]]
+    generateSublists k = [x : xs | x <- [0, 1], xs <- generateSublists (k - 1)]
 
 solveVariant :: Knapsack -> (Int, [Int]) -> (Int, [Int])
 solveVariant _ (_, []) = (0, [])
 solveVariant knapsack variant = do
-    let (variantWeight, variantCost) = getVariantWeightAndCost (items knapsack) (snd variant)
-    if variantWeight <= maxWeight knapsack then
-        (variantCost, snd variant)
-    else
-        (-1, snd variant)
+  let (variantWeight, variantCost) = getVariantWeightAndCost (items knapsack) (snd variant)
+  if variantWeight <= maxWeight knapsack
+    then (variantCost, snd variant)
+    else (-1, snd variant)
 
--- Returns 
+-- Returns
 -- Params: Knapsack -> All variants -> Best variant so far -> returns best variant (weight, cost, variant)
 getBestVariant :: Knapsack -> [(Int, [Int])] -> (Int, [Int])
 getBestVariant _ [] = (-1, [])
 getBestVariant knapsack variants = do
-    let solvedVariants = filter filterFailedSolutions (map (solveVariant knapsack) variants)
-    if not (null solvedVariants) then
-            maximum solvedVariants
-    else
-        (0, [])
+  let solvedVariants = filter filterFailedSolutions (map (solveVariant knapsack) variants)
+  if not (null solvedVariants)
+    then maximum solvedVariants
+    else (0, [])
 
 -- Solve knapsack problem with brute force (trying all permutations of knapsack problem)
 solveKnapsackBruteforce :: Knapsack -> (Bool, Solution)
 solveKnapsackBruteforce knapsack
-    | null (items knapsack) = (True, Solution [])
-    | otherwise = do
-        if cost < minCost knapsack then
-            (False, Solution [])
-        else
-            (True, Solution array) `debug` show cost where
-            (cost, array) = getBestVariant knapsack (generatePermutations (length (items knapsack)))
+  | null (items knapsack) = (True, Solution [])
+  | otherwise = do
+      if cost < minCost knapsack
+        then (False, Solution [])
+        else (True, Solution array) `debug` show cost
+  where
+    (cost, array) = getBestVariant knapsack (generatePermutations (length (items knapsack)))
