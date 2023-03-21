@@ -1,4 +1,4 @@
-module KnapsackBruteSolver
+module KnapsackGeneticSolver
   ( solveKnapsackBruteforce,
     Solution (..),
   )
