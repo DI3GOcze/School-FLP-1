@@ -1,9 +1,11 @@
 module KnapsackGeneticSolver
-  ( solveKnapsackBruteforce,
+  ( solveKnapsackOptimized,
     Solution (..),
   )
 where
 
+import System.Random
+import Debug.Trace
 import Data.Foldable (foldl')
 import Knapsack
   ( Cost,
@@ -11,6 +13,12 @@ import Knapsack
     Knapsack (items, maxWeight, minCost),
     Weight,
   )
+
+debug = flip trace
+
+-- Numer of initial population
+initialLength :: Int
+initialLength = 6
 
 type ItemsCombination = [Int]
 
@@ -24,30 +32,52 @@ instance Show Solution where
   show :: Solution -> String
   show solution = "Solution " ++ show (solCombination solution)
 
--- Returns all permutations of 0 and 1 (allItemsCombinations 2 = [[0,0], [1,0], [0,1], [1,1]])
--- Params: Number of array elements
-allItemsCombinations :: Int -> [ItemsCombination]
-allItemsCombinations 0 = [[]]
-allItemsCombinations n = [x : xs | x <- [0, 1], xs <- allItemsCombinations (n - 1)]
-
--- Returns weight and cost of knapsack variant passed in first parameter
--- Params: Knapsack items -> knapsack variant (eg. [0,1,0,0])
-getCombinationWeightAndCost :: [Item] -> ItemsCombination -> (Weight, Cost)
-getCombinationWeightAndCost items combination = foldl' (\acc (item, isIncluded) -> if isIncluded == 1 then (fst acc + weight item, snd acc + cost item) else acc) (0, 0) (zip items combination)
-
--- Returns best solution of passed knapsack problem
-getBestSolution :: Knapsack -> [ItemsCombination] -> Solution
-getBestSolution knapsack combinations
-  | null (items knapsack) = Solution 0 0 []
-  | otherwise = foldl' helper (Solution 0 0 []) combinations
-  where
-    helper :: Solution -> ItemsCombination -> Solution
-    helper bestSolution combination = if combinationWeight > maxWeight knapsack || combinationCost < solCost bestSolution then bestSolution else Solution combinationWeight combinationCost combination
-      where
-        (combinationWeight, combinationCost) = getCombinationWeightAndCost (items knapsack) combination
 
 -- Solve knapsack problem with brute force (trying all permutations of knapsack problem)
-solveKnapsackBruteforce :: Knapsack -> Maybe Solution
-solveKnapsackBruteforce knapsack = if solCost bestSolution >= minCost knapsack then Just bestSolution else Nothing
-  where
-    bestSolution = getBestSolution knapsack (allItemsCombinations (length (items knapsack)))
+solveKnapsackOptimized :: Knapsack -> StdGen -> Maybe Solution
+solveKnapsackOptimized knapsack gen = do
+  let a = generateInitialGeneration initialLength (length $ items knapsack) gen
+  let b = generateInitialGeneration initialLength (length $ items knapsack)
+  Just (Solution 1 1 (fst (randomItemsCombination 5 gen))) `debug` show a
+
+
+randomItemsCombination :: Int -> StdGen -> (ItemsCombination, StdGen)
+randomItemsCombination 0 gen = ([], gen)
+randomItemsCombination n gen =
+    let (value, newGen) = randomR (0,1) gen
+        (restOfList, finalGen) = randomItemsCombination (n-1) newGen
+    in  (value:restOfList, finalGen)
+
+generateInitialGeneration :: Int -> Int -> StdGen -> ([ItemsCombination], StdGen)
+generateInitialGeneration 0 _ gen = ([], gen)
+generateInitialGeneration n itemsCount gen =
+    let (value, newGen) = randomItemsCombination itemsCount gen
+        (restOfList, finalGen) = generateInitialGeneration (n-1) itemsCount newGen
+    in  (value:restOfList, finalGen)
+
+-- Returns fitness coeficient of knapsack combination
+getCombinationFitness :: Knapsack -> ItemsCombination -> Cost
+getCombinationFitness knapsack combination =
+  let (combinationWeight, combinationCost) = foldl' (\acc (item, isIncluded) -> (isIncluded * fst acc + weight item, isIncluded * snd acc + cost item)) (0, 0) (zip (items knapsack) combination)
+  in if combinationWeight > maxWeight knapsack then 0 else combinationCost
+
+-- -- Pick two elements from array and return them and the rest of the array
+-- pickTwoRandomUnique :: [a] -> StdGen -> ((a,a), [a])
+-- pickTwoRandomUnique lst = 
+--   let first =  
+
+-- Deletes array element on given index
+deleteAtIndex :: Int -> [a] -> [a]
+deleteAtIndex i xs = let (ys, zs) = splitAt i xs in ys ++ tail zs
+
+
+-- -- Returns best solution of passed knapsack problem
+-- getBestSolution :: Knapsack -> [ItemsCombination] -> Solution
+-- getBestSolution knapsack combinations
+--   | null (items knapsack) = Solution 0 0 []
+--   | otherwise = foldl' helper (Solution 0 0 []) combinations
+--   where
+--     helper :: Solution -> ItemsCombination -> Solution
+--     helper bestSolution combination = if combinationWeight > maxWeight knapsack || combinationCost < solCost bestSolution then bestSolution else Solution combinationWeight combinationCost combination
+--       where
+--         (combinationWeight, combinationCost) = getCombinationWeightAndCost (items knapsack) combination
