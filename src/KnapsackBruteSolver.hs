@@ -1,27 +1,16 @@
+-- Funkcionální projekt do předmětu FLP
+-- Autor: Jakub Kryštůfek (xkryst02)
+-- Rok: 2023
+
 module KnapsackBruteSolver
 (
     solveKnapsackBruteforce,
-    Solution (..)
+    getBestSolution,
+    ItemsCombination
 ) where
 
-import Knapsack
-    ( Knapsack(minCost, maxWeight, items),
-      Item(cost, weight),
-      Cost,
-      Weight )
+import KnapsackData
 import Data.Foldable (foldl')
-
-type ItemsCombination = [Int]
-
-data Solution = Solution {
-    solWeight :: Weight ,
-    solCost :: Cost ,
-    solCombination :: ItemsCombination}
-
-instance Show Solution where
-    show :: Solution -> String
-    show solution = "Solution " ++ show (solCombination solution)
-
 
 -- Returns all permutations of 0 and 1 (allItemsCombinations 2 = [[0,0], [1,0], [0,1], [1,1]])
 -- Params: Number of array elements
@@ -32,7 +21,7 @@ allItemsCombinations n = [ x:xs | x <- [0,1], xs <- allItemsCombinations (n-1) ]
 -- Returns weight and cost of knapsack variant passed in first parameter
 -- Params: Knapsack items -> knapsack variant (eg. [0,1,0,0])
 getCombinationWeightAndCost :: [Item] -> ItemsCombination -> (Weight, Cost)
-getCombinationWeightAndCost items combination = foldl' (\acc (item, isIncluded) -> (fst acc + isIncluded * weight item, snd acc + isIncluded * cost item)) (0, 0) (zip items combination)
+getCombinationWeightAndCost items' combination = foldl' (\acc (item, isIncluded) -> (fst acc + isIncluded * weight item, snd acc + isIncluded * cost item)) (0, 0) (zip items' combination)
 
 -- Returns best solution of passed knapsack problem
 getBestSolution :: Knapsack -> [ItemsCombination] -> Solution
